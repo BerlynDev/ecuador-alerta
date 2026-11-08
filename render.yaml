@@ -1,0 +1,29 @@
+# Render Blueprint: one free web service serves the API and the built React app.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: ecuador-alerta
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATA_MODE
+        value: live
+      - key: CACHE_TTL_MINUTES
+        value: "45"
+      - key: FIRMS_SOURCES
+        value: VIIRS_NOAA20_NRT,VIIRS_NOAA21_NRT
+      - key: FIRMS_MAP_KEY
+        sync: false # set it in the Render dashboard, never in git
+      - key: LLM_PROVIDER
+        value: none # change to anthropic or openai once you add a key
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        sync: false
