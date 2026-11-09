@@ -1,5 +1,7 @@
 # Ecuador Alerta
 
+[![CI](https://github.com/BerlynDev/ecuador-alerta/actions/workflows/ci.yml/badge.svg)](https://github.com/BerlynDev/ecuador-alerta/actions/workflows/ci.yml)
+
 Monitor casi en tiempo real de **focos de calor e incendios y eventos naturales en Ecuador**, con datos satelitales de la NASA (FIRMS y EONET) y **resúmenes en lenguaje claro generados por IA, anclados a los datos reales y verificados automáticamente**.
 
 > 🇬🇧 [English version](README.md) · Decisiones técnicas explicadas: [docs/DECISIONES.md](docs/DECISIONES.md)

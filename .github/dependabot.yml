@@ -1,0 +1,12 @@
+# Weekly pull requests when GitHub Actions or npm dependencies have new versions.
+# CI tests each one; merge only if it is green.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"

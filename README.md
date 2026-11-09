@@ -1,5 +1,7 @@
 # Ecuador Alerta
 
+[![CI](https://github.com/BerlynDev/ecuador-alerta/actions/workflows/ci.yml/badge.svg)](https://github.com/BerlynDev/ecuador-alerta/actions/workflows/ci.yml)
+
 Near-real-time monitor of **fire hotspots and natural events in Ecuador**, built on NASA satellite data (FIRMS + EONET), with **AI-generated plain-language summaries that are grounded in, and mechanically checked against, the real data**.
 
 > 🇪🇸 [Leer en español](README.es.md) · Design decisions (Spanish): [docs/DECISIONES.md](docs/DECISIONES.md)
@@ -136,4 +138,4 @@ A hotspot is a satellite-detected thermal anomaly: it may be a wildfire, an agri
 
 ## License
 
-MIT © Bernardo López Falconi
+MIT © [BerlynDev](https://github.com/BerlynDev)

@@ -5,9 +5,19 @@ on:
     branches: [main]
   pull_request:
 
+# Least privilege: this workflow only needs to read the code.
+permissions:
+  contents: read
+
+# Several quick pushes: only the newest run matters.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
