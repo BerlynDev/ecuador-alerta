@@ -26,17 +26,21 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 export function Detail({ snapshot, selection, onClose, onSelect }: Props) {
   const [ai, setAi] = useState<AiState>({ status: 'idle' });
   const ref = useRef<HTMLElement>(null);
+  // Same guard as the daily summary: ignore explanations for a previous selection.
+  const explainRequest = useRef(0);
   useEffect(() => {
+    explainRequest.current++;
     setAi({ status: 'idle' });
     // A click on the map should reveal the detail even if the panel is scrolled.
     ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [selection.kind, selection.id]);
 
   const explain = (id: string) => {
+    const req = ++explainRequest.current;
     setAi({ status: 'loading' });
     api.explain(id).then(
-      (result) => setAi({ status: 'done', result }),
-      (err: Error) => setAi({ status: 'error', message: err.message }),
+      (result) => req === explainRequest.current && setAi({ status: 'done', result }),
+      (err: Error) => req === explainRequest.current && setAi({ status: 'error', message: err.message }),
     );
   };
 

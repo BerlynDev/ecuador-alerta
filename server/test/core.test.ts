@@ -37,6 +37,15 @@ describe('TtlCache', () => {
     expect(res).toMatchObject({ value: 'old', stale: true, error: 'NASA down' });
   });
 
+  it('evicts the oldest key beyond maxEntries', async () => {
+    const cache = new TtlCache<string>(1000, Date.now, 2);
+    for (const k of ['a', 'b', 'c']) await cache.getOrLoad(k, async () => k);
+    const loader = vi.fn(async () => 'reloaded');
+    expect((await cache.getOrLoad('a', loader)).value).toBe('reloaded'); // 'a' was evicted
+    expect((await cache.getOrLoad('c', loader)).value).toBe('c'); // 'c' still cached
+    expect(loader).toHaveBeenCalledTimes(1);
+  });
+
   it('propagates errors when there is nothing cached', async () => {
     const cache = new TtlCache<string>(10);
     await expect(cache.getOrLoad('k', async () => Promise.reject(new Error('boom')))).rejects.toThrow('boom');

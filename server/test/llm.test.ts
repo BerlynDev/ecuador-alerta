@@ -23,12 +23,17 @@ describe('AnthropicClient', () => {
     const headers = init.headers as Record<string, string>;
     expect(headers['x-api-key']).toBe('sk-test');
     expect(headers['anthropic-version']).toBe('2023-06-01');
-    expect(JSON.parse(init.body as string)).toMatchObject({
+    const body = JSON.parse(init.body as string);
+    expect(body).toMatchObject({
       model: 'claude-haiku-5-5',
-      max_tokens: 50,
+      output_config: { effort: 'low' },
       system: 'S',
       messages: [{ role: 'user', content: 'U' }],
     });
+    // Room for thinking on top of the visible text, and no sampling params
+    // (current Claude models reject a non-default temperature with HTTP 400).
+    expect(body.max_tokens).toBeGreaterThan(50);
+    expect(body).not.toHaveProperty('temperature');
   });
 
   it('throws on HTTP errors', async () => {

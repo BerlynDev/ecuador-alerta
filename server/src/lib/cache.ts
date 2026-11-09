@@ -26,9 +26,16 @@ export class TtlCache<T> {
   private entries = new Map<string, Entry<T>>();
   private inflight = new Map<string, Promise<CacheResult<T>>>();
 
+  /**
+   * @param maxEntries Upper bound on stored keys; the least recently written
+   *   key is evicted first. Expired entries are NOT dropped on their own,
+   *   because stale-if-error needs them, so caches with many distinct keys
+   *   (like the AI cache, keyed by a hash of the facts) must set a bound.
+   */
   constructor(
     private readonly ttlMs: number,
     private readonly now: () => number = Date.now,
+    private readonly maxEntries = Infinity,
   ) {}
 
   async getOrLoad(key: string, loader: () => Promise<T>): Promise<CacheResult<T>> {
@@ -49,7 +56,13 @@ export class TtlCache<T> {
     try {
       const value = await loader();
       const fresh = { value, fetchedAt: this.now() };
+      // Delete first so the key moves to the end of the Map's insertion order.
+      this.entries.delete(key);
       this.entries.set(key, fresh);
+      while (this.entries.size > this.maxEntries) {
+        const oldest = this.entries.keys().next().value as string;
+        this.entries.delete(oldest);
+      }
       return { ...fresh, stale: false };
     } catch (err) {
       if (previous) {

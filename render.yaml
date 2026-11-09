@@ -11,6 +11,8 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"
+      - key: TRUST_PROXY
+        value: "1" # Render's proxy sits in front: needed for per-visitor rate limits
       - key: DATA_MODE
         value: live
       - key: CACHE_TTL_MINUTES
@@ -25,5 +27,7 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
+      - key: OPENAI_BASE_URL
+        sync: false # e.g. https://api.groq.com/openai/v1 for Groq's free tier
       - key: LLM_MODEL
         sync: false

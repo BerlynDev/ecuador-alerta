@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EventCategory, Snapshot, SnapshotQuery, TimeWindow } from '@ea/shared';
 import { EVENT_CATEGORIES } from '@ea/shared';
 import { api } from './api';
@@ -50,6 +50,9 @@ export default function App() {
   const [selection, setSelection] = useState<Selection>(null);
   const [colorBy, setColorBy] = useState<ColorBy>('frp');
   const [summary, setSummary] = useState<AiState>({ status: 'idle' });
+  // Id of the latest summary request. A reply is shown only if it is still the
+  // latest, so a slow summary can't land under filters it wasn't written for.
+  const summaryRequest = useRef(0);
   const dark = usePrefersDark();
 
   useEffect(() => {
@@ -71,7 +74,9 @@ export default function App() {
         setLoading(false);
       },
     );
-    setSummary({ status: 'idle' }); // a summary describes one specific filter state
+    // A summary describes one specific filter state: drop it, and any in flight.
+    summaryRequest.current++;
+    setSummary({ status: 'idle' });
     return () => ctrl.abort();
   }, [query, reloadKey]);
 
@@ -81,10 +86,11 @@ export default function App() {
   }, []);
 
   const runSummary = () => {
+    const id = ++summaryRequest.current;
     setSummary({ status: 'loading' });
     api.summary(query).then(
-      (result) => setSummary({ status: 'done', result }),
-      (err: Error) => setSummary({ status: 'error', message: err.message }),
+      (result) => id === summaryRequest.current && setSummary({ status: 'done', result }),
+      (err: Error) => id === summaryRequest.current && setSummary({ status: 'error', message: err.message }),
     );
   };
 

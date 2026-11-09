@@ -13,8 +13,8 @@ import type { LlmClient } from '../src/ai/llm.js';
 const NOW = Date.parse('2026-11-08T15:30:00Z');
 const serverRoot = join(__dirname, '..');
 
-function setup(llm: LlmClient | null = null) {
-  const config = loadConfig({ DATA_MODE: 'mock', LLM_PROVIDER: 'none' });
+function setup(llm: LlmClient | null = null, env: Record<string, string> = {}) {
+  const config = loadConfig({ DATA_MODE: 'mock', LLM_PROVIDER: 'none', ...env });
   return createApp({ config, serverRoot, llm, now: () => NOW }).app;
 }
 
@@ -80,6 +80,12 @@ describe('AI endpoints', () => {
     expect(body.origin).toBe('llm');
   });
 
+  it('accepts "7 días" in a 7-day summary (hours=168 is grounded as 7 days)', async () => {
+    const app = setup(fakeLlm('Datos de demostración: en los últimos 7 días hubo actividad en Loja.'));
+    const body = (await request(app).post('/api/ai/summary').send({ hours: 168 })).body as AiText;
+    expect(body.origin).toBe('llm');
+  });
+
   it('rejects LLM text with invented numbers', async () => {
     const app = setup(fakeLlm('Hubo 9999 focos y 12345 evacuados.'));
     const body = (await request(app).post('/api/ai/summary').send({ hours: 24 })).body as AiText;
@@ -100,5 +106,26 @@ describe('AI endpoints', () => {
     expect(ok.body.text).toMatch(/volcán/i);
     expect(ok.body.text).toMatch(/IG-EPN/);
     expect((await request(app).post('/api/ai/explain/NOPE')).status).toBe(404);
+  });
+});
+
+describe('HTTP hardening', () => {
+  it('answers malformed JSON with 400, not a NASA 502', async () => {
+    const res = await request(setup()).post('/api/ai/summary').set('content-type', 'application/json').send('{oops');
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Solicitud inválida.');
+  });
+
+  it('answers oversized bodies with 413', async () => {
+    const res = await request(setup()).post('/api/ai/summary').send({ pad: 'x'.repeat(20_000) });
+    expect(res.status).toBe(413);
+  });
+
+  it('rate-limits each visitor separately behind a proxy (TRUST_PROXY=1)', async () => {
+    const app = setup(null, { TRUST_PROXY: '1', AI_RATE_LIMIT: '1' });
+    const from = (ip: string) => request(app).post('/api/ai/summary').set('X-Forwarded-For', ip).send({});
+    expect((await from('203.0.113.1')).status).toBe(200);
+    expect((await from('203.0.113.2')).status).toBe(200); // different visitor, own bucket
+    expect((await from('203.0.113.1')).status).toBe(429); // same visitor, over the limit
   });
 });

@@ -22,6 +22,8 @@ export interface LlmClient {
 }
 
 const TIMEOUT_MS = 30_000;
+/** Extra output budget for Claude's thinking, on top of the visible text. */
+const THINKING_HEADROOM = 2_000;
 
 export class AnthropicClient implements LlmClient {
   readonly name: string;
@@ -42,10 +44,14 @@ export class AnthropicClient implements LlmClient {
         'anthropic-version': '2023-06-01',
         'content-type': 'application/json',
       },
+      // Current Claude models think before answering and reject non-default
+      // sampling (`temperature` → HTTP 400). Low effort keeps the thinking short
+      // for a simple rewrite task; thinking tokens count toward max_tokens, so
+      // add headroom on top of the length meant for the visible text.
       body: JSON.stringify({
         model: this.model,
-        max_tokens: maxTokens,
-        temperature: 0.2,
+        max_tokens: maxTokens + THINKING_HEADROOM,
+        output_config: { effort: 'low' },
         system,
         messages: [{ role: 'user', content: user }],
       }),

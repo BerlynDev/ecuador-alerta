@@ -76,7 +76,7 @@ OPENAI_API_KEY=...
 LLM_MODEL=...
 ```
 
-Without an LLM the app still produces summaries from deterministic templates.
+Without an LLM the app still produces summaries from deterministic templates (this is the default, and it costs nothing). `server/.env.example` has ready-to-uncomment presets for Groq and Gemini (free tiers), a local Ollama, and Claude.
 
 ## Configuration
 
@@ -90,6 +90,7 @@ Without an LLM the app still produces summaries from deterministic templates.
 | `LLM_PROVIDER` | `none` | `anthropic`, `openai` or `none` |
 | `LLM_MODEL` | `claude-haiku-5-5` for Anthropic | Required for `openai` |
 | `AI_RATE_LIMIT` | `20` | AI requests per IP per 10 minutes |
+| `TRUST_PROXY` | `0` | Reverse proxies in front of the app. Set to `1` on Render so rate limiting sees each visitor's real IP |
 
 All variables are validated at startup with zod; misconfiguration fails fast with a clear message.
 
@@ -114,7 +115,7 @@ All variables are validated at startup with zod; misconfiguration fails fast wit
 ## Tests
 
 ```bash
-npm test             # 47 tests (vitest + supertest)
+npm test             # 52 tests (vitest + supertest)
 npm run typecheck
 ```
 

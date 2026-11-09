@@ -12,6 +12,9 @@ const csv = z
 const schema = z
   .object({
     PORT: z.coerce.number().int().positive().default(8787),
+    // Number of reverse proxies in front of the app (Render = 1). Needed so
+    // req.ip is the visitor's IP and per-IP rate limiting works. 0 = direct.
+    TRUST_PROXY: z.coerce.number().int().min(0).max(10).default(0),
     DATA_MODE: z.enum(['live', 'mock']).default('mock'),
     CACHE_TTL_MINUTES: z.coerce.number().min(1).max(24 * 60).default(45),
 

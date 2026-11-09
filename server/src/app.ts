@@ -56,6 +56,10 @@ export function createApp({ config, serverRoot, fetchFn, llm, now }: AppOptions)
 
   const app = express();
   app.disable('x-powered-by');
+  // Behind a proxy (Render), every request arrives from the proxy's IP. Trusting
+  // exactly N hops makes req.ip the real visitor without letting clients spoof
+  // it with their own X-Forwarded-For (which `true` would allow).
+  if (config.TRUST_PROXY > 0) app.set('trust proxy', config.TRUST_PROXY);
   app.use(express.json({ limit: '10kb' }));
 
   app.use(
@@ -81,6 +85,13 @@ export function createApp({ config, serverRoot, fetchFn, llm, now }: AppOptions)
   const onError: ErrorRequestHandler = (err, _req, res, _next) => {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Parámetros inválidos', details: err.issues.map((i) => `${i.path.join('.')}: ${i.message}`) });
+      return;
+    }
+    // Client errors raised by Express/body-parser (malformed JSON, body too
+    // large...) carry their own 4xx status: report them as such, not as a NASA outage.
+    const status = Number(err?.status ?? err?.statusCode);
+    if (status >= 400 && status < 500) {
+      res.status(status).json({ error: status === 413 ? 'Solicitud demasiado grande.' : 'Solicitud inválida.' });
       return;
     }
     console.error('[api]', err);

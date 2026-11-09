@@ -16,6 +16,8 @@ import { findUnsupportedNumbers } from './verify.js';
  * Results are cached by a hash of the facts: identical data never triggers a
  * second LLM call, which keeps cost predictable on a public demo.
  */
+const MAX_CACHED_TEXTS = 500;
+
 export class AiService {
   private readonly cache: TtlCache<AiText>;
 
@@ -24,7 +26,8 @@ export class AiService {
     ttlMs: number,
     private readonly log: (msg: string) => void = console.warn,
   ) {
-    this.cache = new TtlCache<AiText>(ttlMs);
+    // Every filter combination × every data refresh is a new key: bound it.
+    this.cache = new TtlCache<AiText>(ttlMs, Date.now, MAX_CACHED_TEXTS);
   }
 
   get provider(): string {

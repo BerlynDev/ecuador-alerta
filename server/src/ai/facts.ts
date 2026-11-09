@@ -38,6 +38,8 @@ export function buildSummaryFacts(s: Snapshot) {
   return {
     periodo: {
       ultimasHoras: query.hours,
+      // Lets the model say "últimos 7 días" without the number check rejecting the 7.
+      ultimosDias: query.hours / 24,
       desde: formatLocal(s.window.from),
       hasta: formatLocal(s.window.to),
       zonaHoraria: 'hora de Ecuador continental (UTC-5)',
@@ -63,6 +65,8 @@ export function buildSummaryFacts(s: Snapshot) {
       potenciaTotalMW: round1(c.totalFrp),
     })),
     eventosNaturales: events.map(eventFacts),
+    // The trend always spans 7 days, even for a 24 h window: state it explicitly.
+    diasDeTendencia: s.daily.length,
     tendenciaFocosPorDia: s.daily.map((d) => ({ dia: d.date, focos: d.count })),
     datosDeDemostracion: s.meta.mode === 'mock',
   };

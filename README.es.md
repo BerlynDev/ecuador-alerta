@@ -24,14 +24,14 @@ npm run dev
 
 Abre http://localhost:5173. Arranca en modo demostración.
 
-Para datos reales, pide una MAP_KEY gratuita en https://firms.modaps.eosdis.nasa.gov/api/map_key/, copia `server/.env.example` a `server/.env` y pon `DATA_MODE=live` y `FIRMS_MAP_KEY=tu_clave`. Para la IA, configura `LLM_PROVIDER` (`anthropic` u `openai` compatible) y su clave. Sin IA, la app genera los textos con plantillas deterministas.
+Para datos reales, pide una MAP_KEY gratuita en https://firms.modaps.eosdis.nasa.gov/api/map_key/, copia `server/.env.example` a `server/.env` y pon `DATA_MODE=live` y `FIRMS_MAP_KEY=tu_clave`. Para la IA, configura `LLM_PROVIDER` (`anthropic` u `openai` compatible) y su clave. Sin IA (la opción por defecto, gratis), la app genera los textos con plantillas deterministas. `server/.env.example` trae configuraciones listas para descomentar: Groq y Gemini (gratis), Ollama local y Claude.
 
 ## Comandos
 
 | Comando | Qué hace |
 | --- | --- |
 | `npm run dev` | API (:8787) y web (:5173) con recarga en caliente |
-| `npm test` | 47 pruebas automáticas |
+| `npm test` | 52 pruebas automáticas |
 | `npm run typecheck` | Verificación de tipos de los tres paquetes |
 | `npm run build` | Compila la web y el servidor para producción |
 | `npm start` | Sirve API + web compilada desde un solo proceso |
