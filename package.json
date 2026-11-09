@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Near-real-time monitor of fires and natural events in Ecuador using NASA FIRMS and EONET, with AI-generated summaries.",
-  "author": "Bernardo López Falconi (BerlynDev)",
+  "author": "BerlynDev (https://github.com/BerlynDev)",
   "license": "MIT",
   "workspaces": [
     "shared",
